@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Golden State Rehab — Reception Loop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     GOLDEN STATE REHAB — RECEPTION TV LOOP
+     16:9 · 1920×1080 · ~3:10 total · seamless loop
+     Brand: antique gold #B5904E · deep teal #34514C · cream #F4F1EA
+     All visuals are landscape / empty-facility / abstract only.
+     No people, no PHI, HIPAA-safe.
+     ============================================================ */
+  :root{
+    --cream:#F4F1EA;
+    --cream-light:#F8F5EE;
+    --teal:#34514C;
+    --teal-deep:#26403B;
+    --gold:#B5904E;
+    --gold-soft:#C8A968;
+    --sage:#8A9A8B;
+    --ink:#2B3A36;
+    --panel:rgba(245,242,234,0.90);
+    --panel-line:rgba(181,144,78,0.45);
+    --shadow:0 24px 60px rgba(20,35,30,0.18), 0 4px 14px rgba(20,35,30,0.10);
+    --xfade:1200ms;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#0c0f0e;overflow:hidden;font-family:"Public Sans",system-ui,sans-serif}
+
+  /* Letterbox frame — keeps a perfect 1920×1080 stage on any TV */
+  .frame{position:fixed;inset:0;background:#0c0f0e;display:flex;align-items:center;justify-content:center}
+  .stage{
+    position:absolute;top:50%;left:50%;
+    width:1920px;height:1080px;
+    transform:translate(-50%,-50%);
+    transform-origin:center center;
+    background:var(--cream);
+    overflow:hidden;
+  }
+
+  /* ---- Scenes (crossfade stack) ---- */
+  .scene{
+    position:absolute;inset:0;opacity:0;visibility:hidden;
+    transition:opacity var(--xfade) ease, visibility 0s linear var(--xfade);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .scene.active{opacity:1;visibility:visible;transition:opacity var(--xfade) ease}
+
+  .bg{position:absolute;inset:0;background-size:cover;background-position:center;will-change:transform}
+  .scene.active .bg{animation-fill-mode:both;animation-timing-function:cubic-bezier(.22,.61,.36,1)}
+  /* Ken Burns variants (slow, calm) */
+  .scene.active .kb-in   {animation:kbIn   30s both}
+  .scene.active .kb-out  {animation:kbOut  30s both}
+  .scene.active .kb-panr {animation:kbPanR 30s both}
+  .scene.active .kb-panl {animation:kbPanL 30s both}
+  @keyframes kbIn  {from{transform:scale(1.04)}to{transform:scale(1.16)}}
+  @keyframes kbOut {from{transform:scale(1.16)}to{transform:scale(1.05)}}
+  @keyframes kbPanR{from{transform:scale(1.12) translateX(-1.2%)}to{transform:scale(1.12) translateX(1.6%)}}
+  @keyframes kbPanL{from{transform:scale(1.12) translateX(1.6%)}to{transform:scale(1.12) translateX(-1.2%)}}
+
+  /* Scrims for legibility over photos */
+  .scrim-bottom{position:absolute;inset:0;background:linear-gradient(to top,rgba(18,30,25,0.68) 0%,rgba(18,30,25,0.40) 38%,rgba(18,30,25,0.32) 66%,rgba(18,30,25,0.14) 100%)}
+  .scrim-soft{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 42%,rgba(248,245,238,0.0) 30%,rgba(248,245,238,0.0) 55%,rgba(40,55,50,0.28) 100%)}
+  .wash{position:absolute;inset:0;background:rgba(244,241,234,0.74)}
+  .wash-strong{position:absolute;inset:0;background:linear-gradient(90deg,rgba(244,241,234,0.95) 0%,rgba(244,241,234,0.86) 46%,rgba(244,241,234,0.66) 100%)}
+  .glow{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:1360px;height:940px;
+        background:radial-gradient(closest-side,rgba(248,245,238,0.96),rgba(248,245,238,0.62) 48%,rgba(248,245,238,0) 80%)}
+
+  /* ---- Content wrapper ---- */
+  .content{position:relative;width:100%;height:100%;padding:96px 132px;display:flex;flex-direction:column}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .leftblock{justify-content:center}
+
+  /* ---- Reveal animations (re-fire every loop) ---- */
+  .reveal{opacity:0;transform:translateY(20px)}
+  .scene.active .reveal{animation:rise 1100ms cubic-bezier(.22,.61,.36,1) both}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .d1{animation-delay:.25s!important}.d2{animation-delay:.55s!important}.d3{animation-delay:.85s!important}
+  .d4{animation-delay:1.15s!important}.d5{animation-delay:1.45s!important}.d6{animation-delay:1.75s!important}
+  .d7{animation-delay:2.05s!important}.d8{animation-delay:2.35s!important}
+
+  /* ---- Typography ---- */
+  .kicker{font-family:"Public Sans";font-weight:600;letter-spacing:.42em;text-transform:uppercase;
+          font-size:26px;color:var(--gold)}
+  .kicker.on-dark{color:var(--gold-soft)}
+  h1{font-family:"Cormorant Garamond";font-weight:600;line-height:1.02;letter-spacing:.005em}
+  h2{font-family:"Cormorant Garamond";font-weight:600;line-height:1.04}
+  .display{font-size:120px;color:var(--teal)}
+  .title{font-size:92px;color:var(--teal)}
+  .title.on-dark{color:var(--cream-light)}
+  .lead{font-family:"Public Sans";font-weight:400;font-size:38px;line-height:1.5;color:var(--ink);max-width:1180px}
+  .lead.on-dark{color:rgba(248,245,238,.94)}
+  .lead.tealtext{color:var(--teal)}
+  .hairline{width:96px;height:3px;background:var(--gold);border-radius:3px}
+  .hairline.center-line{margin-left:auto;margin-right:auto}
+
+  /* ---- Logo lockup (intro / outro) ---- */
+  .logo-lockup{position:relative;display:flex;flex-direction:column;align-items:center;gap:30px}
+  .logo-lockup img{width:560px;height:auto;filter:drop-shadow(0 10px 30px rgba(20,35,30,.16))}
+  .logo-lockup .tagline{font-family:"Cormorant Garamond";font-style:italic;font-weight:500;font-size:46px;color:#2c453f;letter-spacing:.01em;
+        text-shadow:0 1px 3px rgba(248,245,238,.75), 0 0 20px rgba(248,245,238,.6)}
+  .logo-lockup .tagline.on-dark{color:#2f4a44}
+
+  /* ---- Card systems ---- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:30px;width:100%;max-width:1360px}
+  .grid-row{display:flex;gap:26px;width:100%;justify-content:center;flex-wrap:nowrap}
+  .card{background:var(--panel);border:1px solid var(--panel-line);border-radius:18px;
+        box-shadow:var(--shadow);padding:40px 42px;display:flex;align-items:center;gap:26px}
+  .card .ic{flex:0 0 auto;width:64px;height:64px;display:flex;align-items:center;justify-content:center;
+            border-radius:14px;background:rgba(181,144,78,.14);color:var(--gold)}
+  .card .ic svg{width:34px;height:34px}
+  .card .ctext{font-family:"Cormorant Garamond";font-weight:600;font-size:42px;color:var(--teal);line-height:1.08}
+
+  /* Checklist (Scene 4) */
+  .panel-card{background:var(--panel);border:1px solid var(--panel-line);border-radius:22px;
+              box-shadow:var(--shadow);padding:56px 60px;max-width:1040px}
+  .checklist{display:flex;flex-direction:column;gap:30px;margin-top:8px}
+  .check{display:flex;align-items:center;gap:26px;font-family:"Public Sans";font-weight:500;font-size:40px;color:var(--ink)}
+  .check .tick{flex:0 0 auto;width:50px;height:50px;border-radius:50%;background:var(--gold);
+               display:flex;align-items:center;justify-content:center}
+  .check .tick svg{width:26px;height:26px;color:#fff}
+
+  /* Chips (Scene 5) */
+  .chips{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;max-width:1300px}
+  .chip{font-family:"Public Sans";font-weight:600;font-size:34px;letter-spacing:.02em;color:var(--teal);
+        background:rgba(245,242,234,.86);border:1.5px solid var(--gold);border-radius:999px;padding:20px 42px;
+        box-shadow:0 8px 22px rgba(20,35,30,.08)}
+
+  /* Program cards (Scene 6) */
+  .prog-feature{display:flex;gap:30px;width:100%;max-width:1420px;justify-content:center}
+  .pcard{background:var(--panel);border:1px solid var(--panel-line);border-radius:20px;box-shadow:var(--shadow);
+         padding:40px 44px;text-align:left;flex:1}
+  .pcard .tab{font-family:"Public Sans";font-weight:700;letter-spacing:.16em;font-size:24px;color:var(--gold);text-transform:uppercase}
+  .pcard .pname{font-family:"Cormorant Garamond";font-weight:600;font-size:54px;color:var(--teal);line-height:1.05;margin-top:6px}
+  .pcard .pdesc{font-family:"Public Sans";font-weight:400;font-size:28px;color:var(--ink);margin-top:12px;line-height:1.4}
+  .prog-row{display:flex;gap:26px;width:100%;max-width:1420px;justify-content:center;margin-top:30px}
+  .pcard.slim{padding:32px 34px}
+  .pcard.slim .pname{font-size:40px}
+  .pcard.slim .pdesc{font-size:24px;margin-top:8px}
+
+  /* Steps (Scene 7) */
+  .steps{display:grid;grid-template-columns:1fr 1fr;gap:26px;width:100%;max-width:1320px}
+  .step{display:flex;align-items:center;gap:28px;background:var(--panel);border:1px solid var(--panel-line);
+        border-radius:18px;box-shadow:var(--shadow);padding:34px 40px}
+  .step .num{flex:0 0 auto;width:70px;height:70px;border-radius:50%;background:var(--teal);color:var(--cream-light);
+             font-family:"Cormorant Garamond";font-weight:600;font-size:42px;display:flex;align-items:center;justify-content:center}
+  .step .stext{font-family:"Public Sans";font-weight:500;font-size:34px;color:var(--ink);line-height:1.2}
+  .contact-bar{display:flex;align-items:center;gap:44px;justify-content:center;margin-top:42px;flex-wrap:wrap}
+  .contact-bar .ci{display:flex;align-items:center;gap:16px;font-family:"Public Sans";font-weight:600;font-size:32px;color:var(--teal)}
+  .contact-bar .ci svg{width:34px;height:34px;color:var(--gold)}
+  .qr{width:150px;height:150px;border-radius:16px;background:#fff;border:2px dashed var(--gold);
+      display:flex;align-items:center;justify-content:center;text-align:center;font-family:"Public Sans";
+      font-weight:600;font-size:20px;color:var(--sage);padding:10px}
+
+  /* Privacy (Scene 8) */
+  .privacy-icons{display:flex;gap:54px;justify-content:center;margin:4px 0 8px}
+  .pic{display:flex;flex-direction:column;align-items:center;gap:16px;font-family:"Public Sans";font-weight:600;font-size:28px;color:var(--teal)}
+  .pic .ring{width:118px;height:118px;border-radius:50%;border:2.5px solid var(--gold);
+             display:flex;align-items:center;justify-content:center;background:rgba(245,242,234,.7)}
+  .pic .ring svg{width:56px;height:56px;color:var(--teal)}
+  .shorts{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+  .shorts span{font-family:"Cormorant Garamond";font-weight:600;font-size:46px;color:var(--teal)}
+  .shorts span .dot{color:var(--gold);padding:0 14px}
+
+  /* Persistent corner wordmark (content scenes) */
+  .corner{position:absolute;left:60px;bottom:54px;display:flex;align-items:center;gap:16px;opacity:.0;
+          transition:opacity 600ms ease}
+  .corner.show{opacity:.85}
+  .corner .mk{font-family:"Cormorant Garamond";font-weight:600;font-size:30px;letter-spacing:.06em;color:var(--teal)}
+  .corner .mk b{color:var(--gold);font-weight:600}
+  .corner.on-dark .mk{color:var(--cream-light)}
+  .corner.on-dark .mk b{color:var(--gold-soft)}
+
+  /* Soft progress hairline at very bottom (subtle) */
+  .progress{position:absolute;left:0;bottom:0;height:4px;width:100%;background:rgba(181,144,78,.16)}
+  .progress .bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold-soft),var(--gold));}
+
+  /* Hint (hidden in fullscreen) */
+  .hint{position:fixed;right:18px;bottom:14px;font-family:"Public Sans";font-size:14px;color:#8a9a8b;
+        background:rgba(0,0,0,.35);padding:7px 12px;border-radius:8px;z-index:50}
+  .hint b{color:#cdd8cf}
+</style>
+</head>
+<body>
+<div class="frame" id="frame">
+  <div class="stage" id="stage">
+
+    <!-- ============ SCENE 1 — ANIMATED LOGO INTRO ============ -->
+    <section class="scene" data-dur="10000">
+      <div class="bg kb-in" style="background-image:url('./plates/plate01_hero_landscape.png')"></div>
+      <div class="glow"></div>
+      <div class="content center">
+        <div class="logo-lockup">
+          <img class="reveal d1" src="./logo/transparent-logo.svg" alt="Golden State Rehab" />
+          <div class="reveal d4 tagline">A supportive path toward healing, structure, and renewal.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCENE 2 — WELCOME / RECEPTION ============ -->
+    <section class="scene" data-dur="18000">
+      <div class="bg kb-panr" style="background-image:url('./plates/plate02_reception.png')"></div>
+      <div class="wash-strong"></div>
+      <div class="content leftblock">
+        <div class="reveal d1 kicker">Welcome</div>
+        <h1 class="reveal d2 title" style="margin-top:22px;max-width:1180px">Welcome to Golden&nbsp;State&nbsp;Rehab</h1>
+        <div class="reveal d3 hairline" style="margin:34px 0"></div>
+        <p class="reveal d4 lead tealtext">Here, clients receive structure, support, and compassionate
+          care in a professional healing environment.</p>
+      </div>
+      <div class="corner on-light show"><span class="mk">GOLDEN STATE <b>REHAB</b></span></div>
+    </section>
+
+    <!-- ============ SCENE 3 — PROGRAM OVERVIEW ============ -->
+    <section class="scene" data-dur="22000">
+      <div class="bg kb-in" style="background-image:url('./plates/plate_abstract_warm.png')"></div>
+      <div class="wash"></div>
+      <div class="content center">
+        <div class="reveal d1 kicker">What We Offer</div>
+        <h2 class="reveal d1 title" style="margin:18px 0 40px">Program Overview</h2>
+        <div class="grid2">
+          <div class="card reveal d2"><span class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg>
+          </span><span class="ctext">Structured Daily Support</span></div>
+          <div class="card reveal d3"><span class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.4"/><path d="M3 19a6 6 0 0 1 12 0M14.5 19a5 5 0 0 1 6.5-4.8"/></svg>
+          </span><span class="ctext">Therapeutic Group Programming</span></div>
+          <div class="card reveal d4"><span class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 17l-4.9 1.1.9-5.5-4-3.9 5.5-.8z"/></svg>
+          </span><span class="ctext">Individualized Treatment Planning</span></div>
+          <div class="card reveal d5"><span class="ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+          </span><span class="ctext">Recovery-Focused Guidance</span></div>
+        </div>
+        <p class="reveal d6 lead" style="margin-top:40px;text-align:center">Our programs are designed to help clients
+          build stability, develop coping skills, and move forward with support.</p>
+      </div>
+      <div class="corner show"><span class="mk">GOLDEN STATE <b>REHAB</b></span></div>
+    </section>
+
+    <!-- ============ SCENE 4 — WHAT CLIENTS CAN EXPECT ============ -->
+    <section class="scene" data-dur="20000">
+      <div class="bg kb-panl" style="background-image:url('./plates/plate04_room.png')"></div>
+      <div class="scrim-soft"></div>
+      <div class="content" style="align-items:flex-end;justify-content:center">
+        <div class="panel-card">
+          <div class="reveal d1 kicker">Your Experience</div>
+          <h2 class="reveal d1 title" style="font-size:72px;margin:14px 0 10px">What Clients Can Expect</h2>
+          <div class="checklist">
+            <div class="check reveal d2"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4 10-11"/></svg></span>A respectful and confidential setting</div>
+            <div class="check reveal d3"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4 10-11"/></svg></span>Supportive clinical groups</div>
+            <div class="check reveal d4"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4 10-11"/></svg></span>Clear daily structure</div>
+            <div class="check reveal d5"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4 10-11"/></svg></span>Skill-building and accountability</div>
+            <div class="check reveal d6"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4 10-11"/></svg></span>A team focused on progress</div>
+          </div>
+        </div>
+      </div>
+      <div class="corner show"><span class="mk">GOLDEN STATE <b>REHAB</b></span></div>
+    </section>
+
+    <!-- ============ SCENE 5 — INCLUSIVITY / BELONGING ============ -->
+    <section class="scene" data-dur="22000">
+      <div class="bg kb-out" style="background-image:url('./plates/plate_abstract_warm.png')"></div>
+      <div class="wash"></div>
+      <div class="content center">
+        <div class="reveal d1 kicker">Belonging</div>
+        <h2 class="reveal d1 title" style="margin:16px 0 26px;max-width:1500px">A Welcoming Environment for Every Client</h2>
+        <p class="reveal d2 lead" style="text-align:center;margin-bottom:44px">We are committed to providing respectful,
+          compassionate care for individuals from all backgrounds.</p>
+        <div class="chips">
+          <span class="chip reveal d3">Respect</span>
+          <span class="chip reveal d4">Dignity</span>
+          <span class="chip reveal d5">Confidentiality</span>
+          <span class="chip reveal d6">Cultural Awareness</span>
+          <span class="chip reveal d7">Nonjudgmental Support</span>
+        </div>
+        <p class="reveal d8 lead tealtext" style="text-align:center;margin-top:46px;font-style:italic;font-family:'Cormorant Garamond';font-size:44px">
+          Every client deserves to feel seen, heard, and supported.</p>
+      </div>
+      <div class="corner show"><span class="mk">GOLDEN STATE <b>REHAB</b></span></div>
+    </section>
+
+    <!-- ============ SCENE 6 — OUR PROGRAMS ============ -->
+    <section class="scene" data-dur="28000">
+      <div class="bg kb-panr" style="background-image:url('./plates/plate_abstract_teal.png')"></div>
+      <div class="wash"></div>
+      <div class="content center">
+        <div class="reveal d1 kicker">Levels of Care</div>
+        <h2 class="reveal d1 title" style="margin:16px 0 36px">Our Programs</h2>
+        <div class="prog-feature">
+          <div class="pcard reveal d2">
+            <div class="tab">PHP</div>
+            <div class="pname">Partial Hospitalization Program</div>
+            <div class="pdesc">Our most structured level of daytime clinical care.</div>
+          </div>
+          <div class="pcard reveal d3">
+            <div class="tab">IOP</div>
+            <div class="pname">Intensive Outpatient Program</div>
+            <div class="pdesc">Flexible, structured support around daily life.</div>
+          </div>
+        </div>
+        <div class="prog-row">
+          <div class="pcard slim reveal d4">
+            <div class="tab">Clinical Support</div>
+            <div class="pname">Care Coordination</div>
+            <div class="pdesc">Individualized care coordination and recovery planning.</div>
+          </div>
+          <div class="pcard slim reveal d5">
+            <div class="tab">Virtual Track</div>
+            <div class="pname">Remote Participation</div>
+            <div class="pdesc">Structured remote participation when clinically appropriate.</div>
+          </div>
+          <div class="pcard slim reveal d6">
+            <div class="tab">Aftercare</div>
+            <div class="pname">Continued Support</div>
+            <div class="pdesc">Continued support beyond treatment.</div>
+          </div>
+        </div>
+      </div>
+      <div class="corner show"><span class="mk">GOLDEN STATE <b>REHAB</b></span></div>
+    </section>
+
+    <!-- ============ SCENE 7 — OUR MODALITIES ============ -->
+    <section class="scene" data-dur="26000">
+      <div class="bg kb-in" style="background-image:url('./plates/plate_modalities.png')"></div>
+      <div class="wash"></div>
+      <div class="content center">
+        <div class="reveal d1 kicker">Evidence-Based &amp; Holistic Care</div>
+        <h2 class="reveal d1 title" style="margin:16px 0 34px">Our Modalities</h2>
+        <div class="prog-row" style="margin-top:0">
+          <div class="pcard slim reveal d2"><div class="tab">Neurotherapy</div><div class="pname">TMS</div><div class="pdesc">Transcranial Magnetic Stimulation</div></div>
+          <div class="pcard slim reveal d3"><div class="tab">Therapy</div><div class="pname">CBT</div><div class="pdesc">Cognitive Behavioral Therapy</div></div>
+          <div class="pcard slim reveal d4"><div class="tab">Therapy</div><div class="pname">DBT</div><div class="pdesc">Dialectical Behavior Therapy</div></div>
+        </div>
+        <div class="prog-row">
+          <div class="pcard slim reveal d5"><div class="tab">Trauma</div><div class="pname">EMDR</div><div class="pdesc">Eye Movement Desensitization &amp; Reprocessing</div></div>
+          <div class="pcard slim reveal d6"><div class="tab">Whole-Person</div><div class="pname">Holistic Recovery</div><div class="pdesc">Yoga, meditation &amp; mindfulness</div></div>
+          <div class="pcard slim reveal d7"><div class="tab">Psychiatry</div><div class="pname">Medication Management</div><div class="pdesc">Expert psychiatric care &amp; support</div></div>
+        </div>
+        <p class="reveal d8 lead" style="text-align:center;margin-top:32px">Plus individual, group, and family therapy and dual-diagnosis care — matched to each client's plan.</p>
+      </div>
+      <div class="corner show"><span class="mk">GOLDEN STATE <b>REHAB</b></span></div>
+    </section>
+
+    <!-- ============ SCENE 8 — SCHEDULING & ADMISSIONS ============ -->
+    <section class="scene" data-dur="22000">
+      <div class="bg kb-in" style="background-image:url('./plates/plate02_reception.png')"></div>
+      <div class="wash-strong"></div>
+      <div class="content center">
+        <div class="reveal d1 kicker">Getting Started</div>
+        <h2 class="reveal d1 title" style="margin:14px 0 12px">Scheduling &amp; Admissions</h2>
+        <p class="reveal d2 lead tealtext" style="text-align:center;margin-bottom:34px">Our team is available to help with
+          program questions, scheduling, and next steps.</p>
+        <div class="steps">
+          <div class="step reveal d3"><span class="num">1</span><span class="stext">Speak with our admissions team</span></div>
+          <div class="step reveal d4"><span class="num">2</span><span class="stext">Schedule an assessment</span></div>
+          <div class="step reveal d5"><span class="num">3</span><span class="stext">Coordinate next steps</span></div>
+          <div class="step reveal d6"><span class="num">4</span><span class="stext">Ask the front desk for assistance</span></div>
+        </div>
+        <div class="contact-bar reveal d7">
+          <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5c0 9 6 15 15 15l1-4-5-2-2 2c-2-1-4-3-5-5l2-2-2-5z"/></svg>(424) 208-3120</span>
+          <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>goldenstate-rehab.com</span>
+          <span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.5 7-11a7 7 0 0 0-14 0c0 4.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>1964 Westwood Blvd, Los Angeles</span>
+        </div>
+      </div>
+      <div class="corner show"><span class="mk">GOLDEN STATE <b>REHAB</b></span></div>
+    </section>
+
+    <!-- ============ SCENE 9 — PRIVACY & RESPECT ============ -->
+    <section class="scene" data-dur="18000">
+      <div class="bg kb-out" style="background-image:url('./plates/plate_abstract_teal.png')"></div>
+      <div class="wash"></div>
+      <div class="content center">
+        <div class="reveal d1 kicker">Confidentiality</div>
+        <h2 class="reveal d1 title" style="margin:14px 0 30px">Privacy &amp; Respect</h2>
+        <div class="privacy-icons reveal d2">
+          <div class="pic"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Confidential</div>
+          <div class="pic"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="14" height="11" rx="2"/><path d="M17 11l4-2v6l-4-2z"/><path d="M3 4l18 16" stroke-width="2"/></svg></span>No Recording</div>
+          <div class="pic"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/><path d="M3 4l18 16" stroke-width="2"/></svg></span>No Photos</div>
+        </div>
+        <p class="reveal d3 lead tealtext" style="text-align:center;max-width:1280px;margin:20px 0 30px">To protect everyone's
+          confidentiality, please do not record, photograph, or share information from the treatment environment.</p>
+        <div class="shorts reveal d4">
+          <span>No recording<span class="dot">·</span>No photos<span class="dot">·</span>No unauthorized sharing</span>
+        </div>
+      </div>
+      <div class="corner show"><span class="mk">GOLDEN STATE <b>REHAB</b></span></div>
+    </section>
+
+    <!-- ============ SCENE 10 — ENCOURAGEMENT / MISSION ============ -->
+    <section class="scene" data-dur="20000">
+      <div class="bg kb-in" style="background-image:url('./plates/plate09_pathway.png')"></div>
+      <div class="scrim-bottom"></div>
+      <div class="content center">
+        <div class="reveal d1 kicker on-dark">Our Mission</div>
+        <h2 class="reveal d2 title on-dark" style="margin:18px 0 28px;text-shadow:0 4px 24px rgba(10,20,16,.5)">Healing Happens One Step at a Time</h2>
+        <p class="reveal d3 lead on-dark" style="text-align:center;max-width:1180px;text-shadow:0 2px 16px rgba(10,20,16,.55)">
+          Recovery is built through support, consistency, accountability, and hope.</p>
+        <p class="reveal d4 lead on-dark" style="text-align:center;margin-top:30px;font-family:'Cormorant Garamond';font-style:italic;font-size:48px;color:#fff;text-shadow:0 2px 18px rgba(10,20,16,.6)">
+          Golden State Rehab is here to support the journey.</p>
+      </div>
+    </section>
+
+    <!-- ============ SCENE 11 — LOOP BACK TO LOGO ============ -->
+    <section class="scene" data-dur="10000">
+      <div class="bg kb-out" style="background-image:url('./plates/plate10_dusk_landscape.png')"></div>
+      <div class="glow"></div>
+      <div class="content center">
+        <div class="logo-lockup">
+          <img class="reveal d1" src="./logo/transparent-logo.svg" alt="Golden State Rehab" />
+          <div class="reveal d3 tagline">Welcome &nbsp;·&nbsp; Support &nbsp;·&nbsp; Structure &nbsp;·&nbsp; Healing</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </div>
+</div>
+
+<div class="hint" id="hint">Press <b>F</b> for fullscreen · <b>Space</b> pause/play</div>
+
+<script>
+/* ---- Fit the 1920×1080 stage into any screen (letterbox) ---- */
+const stage = document.getElementById('stage');
+function fit(){
+  const s = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+  stage.style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+window.addEventListener('resize', fit); fit();
+
+/* ---- Timeline engine ---- */
+const scenes = [...document.querySelectorAll('.scene')];
+const durations = scenes.map(s => +s.dataset.dur);
+const bar = document.getElementById('bar');
+let i = 0, timer = null, rafId = null, startT = 0, paused = false, remaining = durations[0];
+
+function showScene(n){
+  scenes.forEach((s,idx)=>s.classList.toggle('active', idx===n));
+}
+function runProgress(dur){
+  cancelAnimationFrame(rafId);
+  startT = performance.now();
+  const tickP = (now)=>{
+    const elapsed = now - startT;
+    bar.style.width = Math.min(100, (elapsed/dur)*100) + '%';
+    if(elapsed < dur && !paused) rafId = requestAnimationFrame(tickP);
+  };
+  rafId = requestAnimationFrame(tickP);
+}
+function advance(){
+  showScene(i);
+  remaining = durations[i];
+  runProgress(durations[i]);
+  timer = setTimeout(()=>{ i = (i+1) % scenes.length; advance(); }, durations[i]);
+}
+advance();
+
+/* ---- Controls: pause/play + fullscreen ---- */
+function pauseToggle(){
+  if(paused){ paused=false; runProgress(remaining + (performance.now()-startT)); /*resume*/
+    timer = setTimeout(()=>{ i=(i+1)%scenes.length; advance(); }, remaining);
+    startT = performance.now();
+  } else {
+    paused=true; clearTimeout(timer); cancelAnimationFrame(rafId);
+    remaining = remaining - (performance.now()-startT);
+  }
+}
+function fsToggle(){
+  if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.(); }
+  else { document.exitFullscreen?.(); }
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='f'||e.key==='F') fsToggle();
+  if(e.code==='Space'){ e.preventDefault(); pauseToggle(); }
+});
+document.addEventListener('fullscreenchange', ()=>{
+  document.getElementById('hint').style.display = document.fullscreenElement ? 'none':'block';
+});
+
+/* ---- Optional background music (silent by default; browsers block autoplay audio).
+        Drop a file at ./audio/ambient.mp3 and click once to enable sound on the kiosk. ---- */
+const audio = new Audio('./audio/ambient.mp3');
+audio.loop = true; audio.volume = 0.5;
+document.addEventListener('click', ()=>{ audio.play().catch(()=>{}); }, {once:true});
+</script>
+</body>
+</html>
