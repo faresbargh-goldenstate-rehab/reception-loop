@@ -182,7 +182,7 @@
 
   /* Hint (hidden in fullscreen) */
   .hint{position:fixed;right:18px;bottom:14px;font-family:"Public Sans";font-size:14px;color:#8a9a8b;
-        background:rgba(0,0,0,.35);padding:7px 12px;border-radius:8px;z-index:50}
+        background:rgba(0,0,0,.35);padding:7px 12px;border-radius:8px;z-index:50;transition:opacity .6s ease}
   .hint b{color:#cdd8cf}
 </style>
 </head>
@@ -422,7 +422,7 @@
   </div>
 </div>
 
-<div class="hint" id="hint">Press <b>F</b> for fullscreen · <b>Space</b> pause/play</div>
+<div class="hint" id="hint">Press the <b>Select</b> button (or <b>F</b>) for fullscreen</div>
 
 <script>
 /* ---- Fit the 1920×1080 stage into any screen (letterbox) ---- */
@@ -460,9 +460,16 @@ function advance(){
 }
 advance();
 
-/* ---- Controls: pause/play + fullscreen ---- */
+/* ---- Audio (optional; silent until the first Select/tap — browsers block silent autoplay).
+        Drop a file at ./audio/ambient.mp3 to enable soft background music. ---- */
+const audio = new Audio('./audio/ambient.mp3');
+audio.loop = true; audio.volume = 0.5;
+
+/* ---- Controls ----
+   • TV remote Select (center) / tap / Enter / F  → toggle fullscreen (+ start audio)
+   • Space                                        → pause / play                        */
 function pauseToggle(){
-  if(paused){ paused=false; runProgress(remaining + (performance.now()-startT)); /*resume*/
+  if(paused){ paused=false; runProgress(remaining + (performance.now()-startT));
     timer = setTimeout(()=>{ i=(i+1)%scenes.length; advance(); }, remaining);
     startT = performance.now();
   } else {
@@ -471,22 +478,30 @@ function pauseToggle(){
   }
 }
 function fsToggle(){
-  if(!document.fullscreenElement){ document.documentElement.requestFullscreen?.(); }
-  else { document.exitFullscreen?.(); }
+  try{
+    const el = document.documentElement, d = document;
+    const inFs = d.fullscreenElement || d.webkitFullscreenElement;
+    if(!inFs){ (el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen || function(){}).call(el); }
+    else { (d.exitFullscreen || d.webkitExitFullscreen || function(){}).call(d); }
+  }catch(e){}
 }
+let lastAct = 0;
+function activate(){
+  const t = performance.now();
+  if(t - lastAct < 500) return;            // some TV remotes fire click AND Enter — debounce
+  lastAct = t;
+  fsToggle();
+  audio.play().catch(()=>{});
+}
+document.addEventListener('click', activate);
 document.addEventListener('keydown', e=>{
-  if(e.key==='f'||e.key==='F') fsToggle();
-  if(e.code==='Space'){ e.preventDefault(); pauseToggle(); }
+  if(e.key==='f' || e.key==='F' || e.key==='Enter'){ e.preventDefault(); activate(); }
+  else if(e.code==='Space'){ e.preventDefault(); pauseToggle(); }
 });
-document.addEventListener('fullscreenchange', ()=>{
-  document.getElementById('hint').style.display = document.fullscreenElement ? 'none':'block';
-});
-
-/* ---- Optional background music (silent by default; browsers block autoplay audio).
-        Drop a file at ./audio/ambient.mp3 and click once to enable sound on the kiosk. ---- */
-const audio = new Audio('./audio/ambient.mp3');
-audio.loop = true; audio.volume = 0.5;
-document.addEventListener('click', ()=>{ audio.play().catch(()=>{}); }, {once:true});
+function syncHint(){ const h=document.getElementById('hint'); if(h) h.style.display = (document.fullscreenElement||document.webkitFullscreenElement) ? 'none':'block'; }
+document.addEventListener('fullscreenchange', syncHint);
+document.addEventListener('webkitfullscreenchange', syncHint);
+setTimeout(()=>{ const h=document.getElementById('hint'); if(h && !(document.fullscreenElement||document.webkitFullscreenElement)) h.style.opacity='0'; }, 12000);
 </script>
 </body>
 </html>
